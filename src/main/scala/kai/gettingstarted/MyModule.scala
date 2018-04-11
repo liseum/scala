@@ -1,5 +1,9 @@
 package kai.gettingstarted
 
+/**
+  * 단일 객체 선언
+  * 클래스와 클래스의 유일한 인스턴스 동시에 생성
+  */
 object MyModule {
   def abs(n: Int): Int =
     if (n < 0) -n
