@@ -192,6 +192,12 @@ object List {
 
   /**
     * 하나의 목록을 다른 목록의 끝에 추가
+    * ex) (1 2 3 4) (a b c)
+    * step ...
+    * (a, b, c)
+    * (c) (a, b, c)
+    * (b, c) (a, b, c)
+    * (a, b, c) (a, b, c)
     *
     * @param a1
     * @param a2
@@ -200,16 +206,18 @@ object List {
     */
   def append[A](a1: List[A], a2: List[A]): List[A] =
     a1 match {
-      case Nil => a2
+      case Nil => {
+        println("Nil...")
+        a2
+      }
       case Cons(h, t) => {
         Cons(h, append(t, a2))
       }
     }
 
   def append2[A](a1: List[A], a2: List[A]): List[A] =
-    foldLeft(a1, a2)((h, t) => Cons(t, h))
-
-  //  foldRight(a1, a2)(Cons(_ , _))
+  //    foldLeft(a1, a2)((h, t) => Cons(t, h))
+    foldRight(a1, a2)(Cons(_, _))
 
   /**
     * 마지막 tail 제거
@@ -225,6 +233,65 @@ object List {
       case Cons(_, Nil) => Nil
       case Cons(h, t) => Cons(h, init(t))
     }
+
+  // ex 3.16
+  def add(l: List[Int]): List[Int] =
+    foldRight(l, Nil: List[Int])((h, t) => Cons(h + 1, t))
+
+  // ex 3.17
+  def toString(l: List[Double]): List[String] =
+    foldRight(l, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  // ex 3.18
+  def map[A, B](as: List[A])(f: A => B): List[B] =
+    foldRight(as, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  // ex 3.19
+  def filter[A, B](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  // ex 3.20
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, Nil: List[A])(append)
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    concat(map(as)(f))
+
+  //    foldRight(as, Nil: List[B])((h, t) => f(h))
+
+  // ex 3.21
+  def filter2[A, B](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else Nil)
+
+  // ex 3.22
+  def addList(fl: List[Int], ll: List[Int]): List[Int] =
+    (fl, ll) match {
+      case (Nil, _) => Nil
+      case (_, Nil) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addList(t1, t2))
+    }
+
+  // ex 3.33
+  def zipWith[A, B, C](fl: List[A], ll: List[B])(f: (A, B) => C): List[C] =
+    (fl, ll) match {
+      case (Nil, _) => Nil
+      case (_, Nil) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+    }
+
+  @annotation.tailrec
+  def startsWith[A](l: List[A], prefix: List[A]): Boolean = (l, prefix) match {
+    case (_, Nil) => true
+    case (Cons(h, t), Cons(h2, t2)) if h == h2 => startsWith(t, t2)
+    case _ => false
+  }
+
+  @annotation.tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match {
+    case Nil => sub == Nil
+    case _ if startsWith(sup, sub) => true
+    case Cons(_, t) => hasSubsequence(t, sub)
+  }
 
   def main(args: Array[String]): Unit = {
     val ex1: List[Double] = Nil
@@ -249,38 +316,63 @@ object List {
       case _ => 100
     }
     println(x)
+    /*
+        println("==tail==")
+        //    tail(ex1)
+        println(tail(ex2))
+        println(tail(ex3))
+        println(tail(List(1, 2, 3, 4, 5)))
 
-    println("==tail==")
-    //    tail(ex1)
-    println(tail(ex2))
-    println(tail(ex3))
-    println(tail(List(1, 2, 3, 4, 5)))
+        println("==setHead==")
+        //    println(setHead(ex1, "hoho"))
+        println(setHead(ex2, "hoho"))
 
-    println("==setHead==")
-    //    println(setHead(ex1, "hoho"))
-    println(setHead(ex2, "hoho"))
+        println("==drop==")
+        println(drop(List(1, 2, 3, 4, 5), 2))
 
-    println("==drop==")
-    println(drop(List(1, 2, 3, 4, 5), 2))
+        println("==sum==")
+        println(sum2(List(1, 2, 3, 4)))
+        println(sum3(List(1, 2, 3, 4)))
 
-    println("==sum==")
-    println(sum2(List(1, 2, 3, 4)))
-    println(sum3(List(1, 2, 3, 4)))
+        println("==append==")
+        println(append(List(1, 2, 3, 4), List("a", "b", "c")))
+        println(append2(List(1, 2, 3, 4), List("a", "b", "c")))
 
-    println("==append==")
-    println(append(List(1, 2, 3, 4), List("a", "b", "c")))
-    println(append2(List(1, 2, 3, 4), List("a", "b", "c")))
+        println("==init==")
+        println(init(List(1, 2, 3, 4, 5)))
 
-    println("==init==")
-    println(init(List(1, 2, 3, 4, 5)))
+        println("===prodiction")
+        println(product2(List(1, 2, 3, 4)))
+        println(product3(List(1, 2, 3, 4)))
 
-    println("===prodiction")
-    println(product2(List(1, 2, 3, 4)))
-    println(product3(List(1, 2, 3, 4)))
+        println("==reverse==")
+        println(reverse(List(1, 2, 3, 4)))
+    */
 
-    println("==reverse==")
-    println(reverse(List(1, 2, 3, 4)))
+    // ex 3.16
+    // 정수 목록 요소에 1 더하기
+    //println(foldRight(List(1, 2, 3), Nil: List[Int])((x, y) => Cons(x + 1, y)))
 
+    // ex 3.17
+    //println(toString(List(1.0, 2.0, 5.0, 2.0, 3.0)))
+
+    // ex 3.18
+    //println(map(List(1, 2, 3))(a => a + 1))
+
+    // ex 3.19
+    //println(filter(List(1, 2, 3, 4, 5, 6, 7, 8))(a => if (a % 2 == 0) true else false))
+
+    // ex 3.20
+    //println(flatMap(List(1, 2, 3))(i => List(i, i)))
+
+    // ex 3.21
+    //println(filter2(List(1, 2, 3, 4, 5, 6))(a => if (a % 2 == 0) true else false))
+
+    // ex 3.22
+    //println(addList(List(1,2,3,4), List(10,11,12,13,14)))
+
+    // ex 3.33
+    println(hasSubsequence(List(1,2,3,5,6,8), List(2,3,3,4,10)))
 
   }
 }
