@@ -120,7 +120,7 @@ object Option {
   def sequence[A](a: List[Option[A]]): Option[List[A]] =
     a match {
       case Nil => Some(Nil)
-      case h :: t => h.flatMap(tt => sequence(t).map(h :: _))
+      case h :: t => h.flatMap(tt => sequence(t).map(tt :: _))
     }
 
   /**
@@ -146,7 +146,6 @@ object Option {
     traverse(a)(x => x)
 
   def main(args: Array[String]): Unit = {
-    println("Hello")
     println(mean(Seq(1, 2, 3, 4, 5)))
   }
 
