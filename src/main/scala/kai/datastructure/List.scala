@@ -22,6 +22,8 @@ sealed trait List[+A]
 /**
   * 2가기 자료 생성자
   * Nil 표기법을 통해서 빈 List를 구축할 수 있게 되었다.
+  * case로 인해 자동으로 apply method 구현
+  * -> 객체를 method처럼 사용 가능
   */
 case object Nil extends List[Nothing]
 
@@ -41,6 +43,12 @@ object List {
     case Cons(x, xs) => x + sum(xs)
   }
 
+  def sum2_(ints: List[Int]): Int =
+    foldLeft(ints, 0)((x, y) => x + y)
+
+  def sum3_(ints: List[Int]): Int =
+    foldLeft(ints, 0)(_ + _)
+
   def product(ds: List[Double]): Double = ds match {
     case Nil => 1.0
 
@@ -51,6 +59,8 @@ object List {
     case Cons(x, xs) => x * product(xs)
   }
 
+  def product2_(ds: List[Double]): Double =
+    foldLeft(ds, 1.0)(_ * _)
 
   /**
     * 목록에 대한 재귀와 고차함수로의 일반화
@@ -106,14 +116,16 @@ object List {
 
   /**
     * reverse List(1, 2, 3) => List(3, 2 , 1)
+    * List[A]() 로 쓸 수 있는 이유는 case object로 Nil이 Nil[Nothing]을 상속 받아 구현
     */
 
-  def reverse[A](as: List[A]): List[A] =
-    foldLeft(as, List[A]())((t, h) => Cons(h, t))
+  def reverse[A](l: List[A]): List[A] =
+    foldLeft(l, List[A]())((t, h) => Cons(h, t))
 
   /**
     * 스칼라 가변 인수 함수
     * 가변 인수 함수 구현을 통해 함수 인수중 리터럴 구문으로 호출할 수 있다.
+    * `_*` : 가변인수가 return 값이 됨
     *
     * @param as
     * @tparam A
@@ -215,6 +227,12 @@ object List {
       }
     }
 
+  def append_[A](a1: List[A], a2: List[A]): List[A] =
+    foldLeft(a1, a2)((x, y) => Cons(y, x))
+
+  def append_2[A](a1: List[A], a2: List[A]): List[A] =
+    foldRight(a1, a2)((x, y) => Cons(x, y))
+
   def append2[A](a1: List[A], a2: List[A]): List[A] =
   //    foldLeft(a1, a2)((h, t) => Cons(t, h))
     foldRight(a1, a2)(Cons(_, _))
@@ -241,6 +259,10 @@ object List {
   // ex 3.17
   def toString(l: List[Double]): List[String] =
     foldRight(l, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  // ex 3.18
+  //  def map[A, B](as: List[A])(f: A => B): List[B] =
+  //    foldLeft(as, List[A]())((x, y) => Cons(x, f(y)))
 
   // ex 3.18
   def map[A, B](as: List[A])(f: A => B): List[B] =
@@ -295,13 +317,13 @@ object List {
 
   def main(args: Array[String]): Unit = {
     val ex1: List[Double] = Nil
-    println("ex1 : " + ex1)
+    //    println("ex1 : " + ex1)
 
     val ex2: List[Int] = Cons(1, Nil)
-    println("ex2 : " + ex2)
+    //    println("ex2 : " + ex2)
 
     val ex3: List[String] = Cons("ass", Cons("bb", Nil))
-    println(ex3)
+    //    println(ex3)
 
     val x = List(1, 2, 3, 4, 5) match {
       // fail
@@ -315,7 +337,7 @@ object List {
       // success
       case _ => 100
     }
-    println(x)
+    //    println(x)
     /*
         println("==tail==")
         //    tail(ex1)
@@ -357,7 +379,7 @@ object List {
     //println(toString(List(1.0, 2.0, 5.0, 2.0, 3.0)))
 
     // ex 3.18
-    //println(map(List(1, 2, 3))(a => a + 1))
+    println(map(List(1, 2, 3))(a => a + 1))
 
     // ex 3.19
     //println(filter(List(1, 2, 3, 4, 5, 6, 7, 8))(a => if (a % 2 == 0) true else false))
@@ -372,7 +394,7 @@ object List {
     //println(addList(List(1,2,3,4), List(10,11,12,13,14)))
 
     // ex 3.33
-    println(hasSubsequence(List(1,2,3,5,6,8), List(2,3,3,4,10)))
+    //println(hasSubsequence(List(1, 2, 3, 5, 6, 8), List(2, 3, 3, 4, 10)))
 
   }
 }
